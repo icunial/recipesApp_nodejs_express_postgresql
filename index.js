@@ -60,6 +60,16 @@ app.post("/", (req, res) => {
   );
 });
 
+// Delete recipe by id
+app.delete("/:id", (req, res) => {
+  const id = req.params.id;
+
+  pool.query("DELETE FROM recipes WHERE id = $1", [id], (err, results) => {
+    if (err) throw err;
+    return res.status(200).json(results);
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
