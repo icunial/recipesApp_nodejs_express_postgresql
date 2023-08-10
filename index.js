@@ -20,6 +20,7 @@ const pool = new Pool({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Get all recipes
 app.get("/", (req, res) => {
   pool.query("SELECT * FROM recipes", (err, results) => {
     if (err) {
