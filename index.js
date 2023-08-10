@@ -30,6 +30,22 @@ app.get("/", (req, res) => {
   });
 });
 
+// Get Recipe by ID
+app.get("/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+
+  pool.query(
+    "SELECT * FROM recipes WHERE id = $1",
+    [req.params.id],
+    (err, results) => {
+      if (err) {
+        throw err;
+      }
+      return res.status(200).json(results.rows);
+    }
+  );
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
