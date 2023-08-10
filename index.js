@@ -70,6 +70,21 @@ app.delete("/:id", (req, res) => {
   });
 });
 
+// Update recipe by id
+app.put("/:id", (req, res) => {
+  const id = req.params.id;
+  const recipeInfo = req.body;
+
+  pool.query(
+    "UPDATE recipes SET name = $1, ingredients = $2, directions = $3 WHERE id = $4",
+    [recipeInfo.name, recipeInfo.ingredients, recipeInfo.directions, id],
+    (err, results) => {
+      if (err) throw err;
+      return res.status(200).json(results);
+    }
+  );
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
