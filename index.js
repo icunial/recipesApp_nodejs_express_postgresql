@@ -46,6 +46,20 @@ app.get("/:id", (req, res) => {
   );
 });
 
+// Create new Recipe
+app.post("/", (req, res) => {
+  const { name, ingredients, directions } = req.body;
+
+  pool.query(
+    "INSERT INTO recipes (name, ingredients, directions) VALUES ($1, $2, $3)",
+    [name, ingredients, directions],
+    (err, results) => {
+      if (err) throw err;
+      return res.status(201).json(results.rows);
+    }
+  );
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
