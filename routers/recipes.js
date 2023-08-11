@@ -45,7 +45,7 @@ router.get("/:id", (req, res, next) => {
 });
 
 // Create new Recipe
-router.post("/", (req, res) => {
+router.post("/", (req, res, next) => {
   const { name, ingredients, directions } = req.body;
 
   // Validations
@@ -60,8 +60,13 @@ router.post("/", (req, res) => {
     "INSERT INTO recipes (name, ingredients, directions) VALUES ($1, $2, $3)",
     [name, ingredients, directions],
     (err, results) => {
-      if (err) throw err;
-      return res.status(201).json(results.rows);
+      if (err) return next();
+      pool.query("SELECT * FROM recipes", (err, results) => {
+        if (err) {
+          return next();
+        }
+        return res.status(200).json({ statusCode: 201, data: results.rows });
+      });
     }
   );
 });
