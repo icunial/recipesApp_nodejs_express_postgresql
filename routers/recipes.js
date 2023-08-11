@@ -5,7 +5,7 @@ const Pool = require("pg").Pool;
 
 // Init Pool
 const pool = new Pool({
-  //user: process.env.USERNAME_DB,
+  user: process.env.USERNAME_DB,
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
@@ -18,12 +18,12 @@ router.get("/", (req, res, next) => {
     if (err) {
       return next();
     }
-    return res.status(200).json(results.rows);
+    return res.status(200).json({ statusCode: 200, data: results.rows });
   });
 });
 
 // Get Recipe by ID
-router.get("/:id", (req, res) => {
+router.get("/:id", (req, res, next) => {
   const id = parseInt(req.params.id);
 
   pool.query(
@@ -31,7 +31,13 @@ router.get("/:id", (req, res) => {
     [req.params.id],
     (err, results) => {
       if (err) {
-        throw err;
+        return next();
+      }
+      if (results.rows.length === 0) {
+        return res.status(404).json({
+          statusCode: 404,
+          msg: `Recipe with id ${id} not found!`,
+        });
       }
       return res.status(200).json(results.rows);
     }
