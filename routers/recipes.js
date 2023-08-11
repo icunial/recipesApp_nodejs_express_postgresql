@@ -41,7 +41,7 @@ router.get("/:id", (req, res, next) => {
       }
       return res.status(200).json({
         statusCode: 200,
-        data: results.rows,
+        data: results.rows[0],
       });
     }
   );
