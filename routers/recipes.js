@@ -48,6 +48,14 @@ router.get("/:id", (req, res, next) => {
 router.post("/", (req, res) => {
   const { name, ingredients, directions } = req.body;
 
+  // Validations
+  if (!name || !ingredients || !directions) {
+    return res.status(400).json({
+      statusCode: 400,
+      msg: `Name, ingredients and directions properties are required!`,
+    });
+  }
+
   pool.query(
     "INSERT INTO recipes (name, ingredients, directions) VALUES ($1, $2, $3)",
     [name, ingredients, directions],
