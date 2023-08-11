@@ -5,7 +5,7 @@ const Pool = require("pg").Pool;
 
 // Init Pool
 const pool = new Pool({
-  user: process.env.USERNAME_DB,
+  //user: process.env.USERNAME_DB,
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
@@ -13,10 +13,10 @@ const pool = new Pool({
 });
 
 // Get all recipes
-router.get("/", (req, res) => {
+router.get("/", (req, res, next) => {
   pool.query("SELECT * FROM recipes", (err, results) => {
     if (err) {
-      throw err;
+      return next();
     }
     return res.status(200).json(results.rows);
   });
