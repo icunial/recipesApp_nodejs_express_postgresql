@@ -39,7 +39,10 @@ router.get("/:id", (req, res, next) => {
           msg: `Recipe with id ${id} not found!`,
         });
       }
-      return res.status(200).json(results.rows);
+      return res.status(200).json({
+        statusCode: 200,
+        data: results.rows,
+      });
     }
   );
 });
@@ -105,11 +108,54 @@ router.put("/:id", (req, res) => {
   const recipeInfo = req.body;
 
   pool.query(
-    "UPDATE recipes SET name = $1, ingredients = $2, directions = $3 WHERE id = $4",
-    [recipeInfo.name, recipeInfo.ingredients, recipeInfo.directions, id],
+    "SELECT * FROM recipes WHERE id = $1",
+    [req.params.id],
     (err, results) => {
-      if (err) throw err;
-      return res.status(200).json(results);
+      if (err) {
+        return next();
+      }
+      if (results.rows.length === 0) {
+        return res.status(404).json({
+          statusCode: 404,
+          msg: `Recipe with id ${id} not found!`,
+        });
+      }
+      const recipeToUpdate = results.rows[0];
+      pool.query(
+        "UPDATE recipes SET name = $1, ingredients = $2, directions = $3 WHERE id = $4",
+        [
+          recipeInfo.name ? recipeInfo.name : recipeToUpdate.name,
+          recipeInfo.ingredients
+            ? recipeInfo.ingredients
+            : recipeToUpdate.ingredients,
+          recipeInfo.directions
+            ? recipeInfo.directions
+            : recipeToUpdate.directions,
+          id,
+        ],
+        (err, results) => {
+          if (err) throw err;
+          pool.query(
+            "SELECT * FROM recipes WHERE id = $1",
+            [req.params.id],
+            (err, results) => {
+              if (err) {
+                return next();
+              }
+              if (results.rows.length === 0) {
+                return res.status(404).json({
+                  statusCode: 404,
+                  msg: `Recipe with id ${id} not found!`,
+                });
+              }
+              return res.status(200).json({
+                statusCode: 200,
+                data: results.rows[0],
+              });
+            }
+          );
+        }
+      );
     }
   );
 });
