@@ -72,13 +72,31 @@ router.post("/", (req, res, next) => {
 });
 
 // Delete recipe by id
-router.delete("/:id", (req, res) => {
+router.delete("/:id", (req, res, next) => {
   const id = req.params.id;
-
-  pool.query("DELETE FROM recipes WHERE id = $1", [id], (err, results) => {
-    if (err) throw err;
-    return res.status(200).json(results);
-  });
+  pool.query(
+    "SELECT * FROM recipes WHERE id = $1",
+    [req.params.id],
+    (err, results) => {
+      if (err) {
+        return next();
+      }
+      if (results.rows.length === 0) {
+        return res.status(404).json({
+          statusCode: 404,
+          msg: `Recipe with id ${id} not found!`,
+        });
+      }
+      const recipeToDelete = results.rows[0];
+      pool.query("DELETE FROM recipes WHERE id = $1", [id], (err, results) => {
+        if (err) return next();
+        return res.status(200).json({
+          statusCode: 200,
+          data: recipeToDelete,
+        });
+      });
+    }
+  );
 });
 
 // Update recipe by id
